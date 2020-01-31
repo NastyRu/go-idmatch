@@ -8,9 +8,7 @@ import (
 	"sync"
 
 	"github.com/maddevsio/go-idmatch/log"
-	"github.com/maddevsio/go-idmatch/ocr/postprocessing"
 	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
-	"github.com/maddevsio/go-idmatch/ocr/processing"
 	"github.com/maddevsio/go-idmatch/templates"
 	"github.com/maddevsio/go-idmatch/utils"
 	"gocv.io/x/gocv"
@@ -21,8 +19,6 @@ func readAndScale(path string) (gocv.Mat, error) {
 		return gocv.Mat{}, err
 	}
 	img := gocv.IMRead(path, gocv.IMReadColor)
-	// k := 1000.0 / float64(img.Rows())
-	// gocv.Resize(img, &img, image.Point{0, 0}, k, k, gocv.InterpolationCubic)
 	return img, nil
 }
 
@@ -32,29 +28,19 @@ func contour(side templates.Side, ratio float64) (gocv.Mat, error) {
 	return preprocessing.Contour(side.Img, sampleMap, side.Match, ratio, side.Cols)
 }
 
-func regions(img gocv.Mat, c templates.Card) ([]processing.Block, error) {
-	region, err := processing.TextRegions(img, c)
-	if err != nil {
-		return nil, err
-	}
-	blocks, _ := processing.RecognizeRegions(img, c, region)
-	return blocks, nil
-}
-
-func Recognize(front, back, template, preview string) (map[string]interface{}, []string) {
+func Recognize(front, back, template, preview string) ([]string) {
 	var path []string
 	cards, err := templates.Load(template)
 	if err != nil {
 		log.Print(log.ErrorLevel, "Failed to load \""+template+"\" template: "+err.Error())
-		return nil, path
+		return path
 	}
 
 	if len(front) == 0 && len(back) == 0 {
 		log.Print(log.ErrorLevel, "Please provide at least one side image of document")
-		return nil, path
+		return path
 	}
 
-	// A bit more uglyness
 	frontside, ferr := readAndScale(front)
 	backside, berr := readAndScale(back)
 	defer frontside.Close()
@@ -108,14 +94,7 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 					log.Print(log.ErrorLevel, err.Error())
 					return
 				}
-				blocks, err := regions(img, match)
-				if err != nil {
-					log.Print(log.ErrorLevel, err.Error())
-					return
-				}
 				v.Img = img
-				processing.MatchBlocks(blocks, v, v.Img)
-				processing.RecognizeText(v.Structure)
 				output <- v
 			}
 		}(v)
@@ -138,13 +117,11 @@ func Recognize(front, back, template, preview string) (map[string]interface{}, [
 		}
 	}
 
-	result := postprocessing.Sanitize(data)
-
 	if log.IsDebug() {
 		for _, v := range data {
 			utils.ShowImageInNamedWindow(v.Img, v.Sample)
 		}
 	}
 
-	return result, path
+	return path
 }

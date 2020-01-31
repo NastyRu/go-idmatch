@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	//"image/color"
 	"math"
 	"math/rand"
 	"sync"
@@ -185,12 +186,6 @@ func Match(img, sample gocv.Mat) []MatchPoint {
 	gocv.CvtColor(img, &gray, gocv.ColorBGRToGray)
 	b := descriptorArr(gray)
 
-	// for _, v := range *a {
-	// 	gocv.Circle(&sample, image.Point{int(v.keypoint.X), int(v.keypoint.Y)}, int(v.keypoint.Size), color.RGBA{255, 0, 0, 255}, 1)
-	// }
-
-	// utils.ShowImage(sample)
-
 	return filterGoodMatch(matchDescriptors(*a, b))
 }
 
@@ -207,8 +202,6 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 			continue
 		}
 
-		// Matching trianlges positions
-		fmt.Printf("testing %d set of triangles\n", set+1)
 		for i := 0; i < len(equals)/3; i++ {
 			// Need to use triangle struct
 			p1 := image.Point{X: int(equals[i].a.keypoint.X), Y: int(equals[i].a.keypoint.Y)}
@@ -238,27 +231,8 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 	theta2 := math.Atan2(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, equals[1].b.keypoint.X-equals[0].b.keypoint.X)
 	theta := (theta2 - theta1) * 180 / math.Pi
 
-	fmt.Printf("rotation angle: %v\n", theta)
-
-	if theta < 0 {
-		theta = theta + 360
-	}
-
 	var theta_ float64 = 0
-
-	if theta <= 90 {
-		theta_ = theta
-	} else if theta <= 180 {
-		theta_ = (180 - theta)
-	} else if theta <= 270 {
-		theta_ = (theta - 180)
-	} else if theta <= 360 {
-		theta_ = (360 - theta)
-	} else {
-		return img, errors.New("Atan2 angle range violated")
-	}
-
-	theta_ = theta_ * math.Pi / 180
+	theta_ = theta * math.Pi / 180
 
 	var dx_1 int = img.Cols()
 	var dy_1 int = img.Rows()
@@ -273,8 +247,6 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 	d1 := math.Sqrt(math.Pow(equals[1].a.keypoint.X-equals[0].a.keypoint.X, 2) + math.Pow(equals[1].a.keypoint.Y-equals[0].a.keypoint.Y, 2))
 	d2 := math.Sqrt(math.Pow(equals[1].b.keypoint.X-equals[0].b.keypoint.X, 2) + math.Pow(equals[1].b.keypoint.Y-equals[0].b.keypoint.Y, 2))
 	scale := d2 / d1
-
-	fmt.Printf("scale rate: %v\n", scale)
 
 	left := equals[1].b.keypoint.X - equals[1].a.keypoint.X*scale
 	right := equals[1].b.keypoint.X + (sampleWidth-equals[1].a.keypoint.X)*scale
@@ -294,10 +266,27 @@ func Contour(img, sample gocv.Mat, goodMatch []MatchPoint, ratio, sampleWidth fl
 		bottom = float64(img.Rows())
 	}
 
-	// gocv.Rectangle(&img, image.Rect(int(left), int(top), int(right), int(bottom)), color.RGBA{0, 255, 0, 255}, 2)
-	// utils.ShowImage(img)
-
 	img = img.Region(image.Rect(int(left), int(top), int(right), int(bottom)))
+
+	x0 := equals[1].b.keypoint.X
+	y0 := equals[1].b.keypoint.Y
+
+	fmt.Printf("(%d %d), ", int(x0 + (left - x0) * math.Cos(theta_) - (top - y0) * math.Sin(theta_)), int(y0 + (top - y0) * math.Cos(theta_) + (left - x0) * math.Sin(theta_)))
+	fmt.Printf("(%d %d), ", int(x0 + (right - x0) * math.Cos(theta_) - (top - y0) * math.Sin(theta_)), int(y0 + (top - y0) * math.Cos(theta_) + (right - x0) * math.Sin(theta_)))
+	fmt.Printf("(%d %d), ", int(x0 + (left - x0) * math.Cos(theta_) - (bottom - y0) * math.Sin(theta_)), int(y0 + (bottom - y0) * math.Cos(theta_) + (left - x0) * math.Sin(theta_)))
+	fmt.Printf("(%d %d)\n", int(x0 + (right - x0) * math.Cos(theta_) - (bottom - y0) * math.Sin(theta_)), int(y0 + (bottom - y0) * math.Cos(theta_) + (right - x0) * math.Sin(theta_)))
+
+	/*p1 := image.Point{X: int(x0 + (left - x0) * math.Cos(theta_) - (top - y0) * math.Sin(theta_)), Y: int(y0 + (top - y0) * math.Cos(theta_) + (left - x0) * math.Sin(theta_))}
+	p2 := image.Point{X: int(x0 + (right - x0) * math.Cos(theta_) - (top - y0) * math.Sin(theta_)), Y: int(y0 + (top - y0) * math.Cos(theta_) + (right - x0) * math.Sin(theta_))}
+	p3 := image.Point{X: int(x0 + (left - x0) * math.Cos(theta_) - (bottom - y0) * math.Sin(theta_)), Y: int(y0 + (bottom - y0) * math.Cos(theta_) + (left - x0) * math.Sin(theta_))}
+	p4 := image.Point{X: int(x0 + (right - x0) * math.Cos(theta_) - (bottom - y0) * math.Sin(theta_)), Y: int(y0 + (bottom - y0) * math.Cos(theta_) + (right - x0) * math.Sin(theta_))}
+
+	color := color.RGBA{0, 255, 255, 1}
+
+	gocv.Line(&img, p1, p2, color, 4)
+	gocv.Line(&img, p1, p3, color, 4)
+	gocv.Line(&img, p4, p2, color, 4)
+	gocv.Line(&img, p3, p4, color, 4)*/
 
 	return img, nil
 }
