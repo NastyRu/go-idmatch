@@ -10,7 +10,7 @@ import (
 //export RecognizeFrame
 func RecognizeFrame(name, folder string) {
 	fmt.Printf("Name: %s\n", name)
-	p := ocr.Recognize(name, "" ,"" , folder)
+	_, p := ocr.Recognize(name, "" ,"" , folder)
 	fmt.Printf("Path: %s\n", p)
 }
 
