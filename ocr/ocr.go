@@ -7,10 +7,10 @@ import (
 	"os"
 	"sync"
 
-	"github.com/maddevsio/go-idmatch/log"
-	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
-	"github.com/maddevsio/go-idmatch/templates"
-	"github.com/maddevsio/go-idmatch/utils"
+	"github.com/NastyRu/go-idmatch/log"
+	"github.com/NastyRu/go-idmatch/ocr/preprocessing"
+	"github.com/NastyRu/go-idmatch/templates"
+	"github.com/NastyRu/go-idmatch/utils"
 	"gocv.io/x/gocv"
 )
 
@@ -48,7 +48,6 @@ func Recognize(front, back, template, preview string) ([]string) {
 
 	var wg sync.WaitGroup
 	res := make(chan templates.Card, 5)
-
 	for _, v := range cards {
 		wg.Add(1)
 		go func(v templates.Card) {

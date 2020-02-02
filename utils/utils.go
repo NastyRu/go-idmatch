@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/maddevsio/go-idmatch/log"
+	"github.com/NastyRu/go-idmatch/log"
 	"gocv.io/x/gocv"
 )
 

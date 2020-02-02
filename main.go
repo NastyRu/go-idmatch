@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/maddevsio/go-idmatch/ocr"
+	"github.com/NastyRu/go-idmatch/ocr"
 	"fmt"
 	"C"
 	"os"
@@ -10,7 +10,7 @@ import (
 //export RecognizeFrame
 func RecognizeFrame(name, folder string) {
 	fmt.Printf("Name: %s\n", name)
-	_, p := ocr.Recognize(name, "" ,"" , folder)
+	p := ocr.Recognize(name, "" ,"" , folder)
 	fmt.Printf("Path: %s\n", p)
 }
 

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/maddevsio/go-idmatch/config"
-	"github.com/maddevsio/go-idmatch/ocr/preprocessing"
+	"github.com/NastyRu/go-idmatch/config"
+	"github.com/NastyRu/go-idmatch/ocr/preprocessing"
 	"gocv.io/x/gocv"
 )
 

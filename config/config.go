@@ -3,7 +3,7 @@ package config
 import (
 	"os"
 
-	"github.com/maddevsio/go-idmatch/log"
+	"github.com/NastyRu/go-idmatch/log"
 
 	gcfg "gopkg.in/gcfg.v1"
 )
@@ -40,7 +40,7 @@ const defaultConfig = `
 
 	[template]
 	path = "templates/json/"
-	
+
 	[web]
 	uploadLimit = "10M"
 	static = "web/static/"
