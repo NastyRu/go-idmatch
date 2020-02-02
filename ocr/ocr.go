@@ -3,7 +3,6 @@ package ocr
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"os"
 	"sync"
 
@@ -65,7 +64,6 @@ func Recognize(front, back, template, preview string) ([]string) {
 			if _, err := os.Stat(v.Back.Sample); berr == nil && err == nil {
 				t.Back.Match = preprocessing.Match(backside, backSample)
 			}
-			fmt.Printf("%s: frontside %d, backside %d\n", v.Type, len(t.Front.Match), len(t.Back.Match))
 			res <- t
 		}(v)
 	}
