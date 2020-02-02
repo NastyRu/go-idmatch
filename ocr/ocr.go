@@ -27,8 +27,8 @@ func contour(side templates.Side, ratio float64) (gocv.Mat, error) {
 	return preprocessing.Contour(side.Img, sampleMap, side.Match, ratio, side.Cols)
 }
 
-func Recognize(front, back, template, preview string) ([]string) {
-	var path []string
+func Recognize(front, back, template, preview string) (string) {
+	var path string
 	cards, err := templates.Load(template)
 	if err != nil {
 		log.Print(log.ErrorLevel, "Failed to load \""+template+"\" template: "+err.Error())
@@ -110,7 +110,7 @@ func Recognize(front, back, template, preview string) ([]string) {
 			hash.Write(v.Img.ToBytes())
 			p := preview + "/" + hex.EncodeToString(hash.Sum(nil)) + ".jpeg"
 			gocv.IMWrite(p, v.Img)
-			path = append(path, p)
+			path = p
 		}
 	}
 
