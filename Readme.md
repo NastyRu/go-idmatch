@@ -1,4 +1,4 @@
-Recognition of Driver licences and ID cards based on of [go-idmatch](https://github.com/maddevsio/go-idmatch)
+Recognition of Driver licences and ID cards based on [go-idmatch](https://github.com/maddevsio/go-idmatch). 
 
 **Installation**
 ```
